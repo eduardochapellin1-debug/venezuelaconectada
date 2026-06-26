@@ -93,31 +93,31 @@
   </main>
 
   <div id="seccion-registro">
-    <form>
-      <input type="text" placeholder="Nombre" required>
-      <input type="text" placeholder="Cédula" required>
-      <input type="text" placeholder="Estado/Ciudad" required>
-      <select required>
-        <option value="">Seleccione estado de conectividad/salud</option>
-        <option value="bien">Estoy bien</option>
-        <option value="emergencia">Necesito ayuda</option>
-      </select>
-      <textarea placeholder="Mensaje corto (máx. 100 caracteres)" maxlength="100" required></textarea>
-      <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
-        Acepto publicar mi estado para que mis familiares me encuentren (Marcar con una X en la casilla de al lado)
-        <input type="checkbox" required style="width: 24px; height: 24px;">
-      </label>
-      <button type="submit" onclick="enviarReporte()">Enviar Reporte</button>
-      <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-left:10px">Volver al Inicio</button>
+      <form id="form-registro">
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        <input type="text" id="cedula" placeholder="Cédula" required>
+        <input type="text" id="ubicacion" placeholder="Estado/Ciudad" required>
+        <select id="estado" required>
+          <option value="">Seleccione estado de conectividad/salud</option>
+          <option value="bien">Estoy bien</option>
+          <option value="emergencia">Necesito ayuda</option>
+        </select>
+        <textarea id="mensaje" placeholder="Mensaje corto (máx. 100 caracteres)" maxlength="100" required></textarea>
+        <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
+          Acepto publicar mi estado para que mis familiares me encuentren (Marcar con una X en la casilla de al lado)
+          <input type="checkbox" required style="width: 24px; height: 24px;">
+        </label>
+        <button type="submit">Enviar Reporte</button>
+        <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-left:10px">Volver al Inicio</button>
     </form>
   </div>
 
   <div id="seccion-busqueda">
-    <form>
-      <input type="text" placeholder="Número de cédula" required>
-      <button type="submit" onclick="buscarReporte()">Buscar</button>
-      <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-top:10px; display:block">Volver al Inicio</button>
-    </form>
+      <form id="form-buscar">
+        <input type="text" id="cedula_buscar" placeholder="Número de cédula" required>
+        <button type="submit">Buscar</button>
+        <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-top:10px; display:block">Volver al Inicio</button>
+      </form>
     <div id="resultado-consulta"></div>
   </div>
 
@@ -133,10 +133,28 @@
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-     <script>
-// Inicializar Supabase
+  <script>
+// Inicializar Supabase con credenciales reales del proyecto
 const { createClient } = supabase;
-const supabaseClient = createClient('https://supabase.co', 'sb_publishable_JQ-FHGzSDjLbfVvrttqiQA_2xXSJSh-');
+const supabaseUrl = 'https://supabase.co';
+const supabaseKey = 'sb_publishable_JQ-FHGzSDjLbfVvrttqiQA_2xXSJSh-';
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+// Funciones de Navegación Visual (Control de pantallas)
+function showForm(tipo) {
+    document.getElementById('menu-principal').style.display = 'none';
+    if (tipo === 'registro') {
+        document.getElementById('seccion-registro').style.display = 'block';
+    } else if (tipo === 'busqueda') {
+        document.getElementById('seccion-busqueda').style.display = 'block';
+    }
+}
+
+function volverInicio() {
+    document.getElementById('seccion-registro').style.display = 'none';
+    document.getElementById('seccion-busqueda').style.display = 'none';
+    document.getElementById('menu-principal').style.display = 'flex';
+}
 
 // Función para registrar estado (Botón Verde)
 async function enviarReporte(e) {
@@ -161,7 +179,7 @@ async function enviarReporte(e) {
 
         alert("Estado Guardado. Gracias por reportarte.");
         document.getElementById('form-registro').reset();
-        window.location.hash = '';
+        volverInicio();
     } catch (error) {
         alert("Error al guardar: " + error.message);
         console.error(error);
@@ -172,7 +190,7 @@ async function enviarReporte(e) {
 async function buscarReporte(e) {
     e.preventDefault();
     const cedula_buscada = document.getElementById('cedula_buscar').value.trim();
-    const resultadoDiv = document.getElementById('resultado-busqueda');
+    const resultadoDiv = document.getElementById('resultado-consulta');
     resultadoDiv.innerHTML = '';
 
     if (!cedula_buscada) {
@@ -191,7 +209,7 @@ async function buscarReporte(e) {
         if (data && data.length > 0) {
             const registro = data[0];
             resultadoDiv.innerHTML = `
-                <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px; text-align:left; border-left:5px solid #28a745;">
+                <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px; text-align:left; border-left:5px solid #28a745; color: black;">
                     <h3>🟢 ${registro.nombre}</h3>
                     <p><strong>Ubicación:</strong> ${registro.ubicacion}</p>
                     <p><strong>Estado:</strong> ${registro.estado}</p>
@@ -206,6 +224,15 @@ async function buscarReporte(e) {
         console.error(error);
     }
 }
+
+// Escuchar los envíos de los formularios de manera nativa
+document.addEventListener('DOMContentLoaded', () => {
+    const formRegistro = document.getElementById('form-registro');
+    const formBuscar = document.getElementById('form-buscar');
+
+    if (formRegistro) formRegistro.addEventListener('submit', enviarReporte);
+    if (formBuscar) formBuscar.addEventListener('submit', buscarReporte);
+});
 </script>
 </body>
 </html>
