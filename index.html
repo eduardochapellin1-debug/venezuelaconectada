@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -128,28 +127,6 @@
     const supabaseKey = 'sb_publishable_JQ-FHGzSDjLbfVvrttqiQA_2xXSJSh-';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    function showForm(formType) {
-      document.getElementById('menu-principal').style.display = 'none';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      
-      if (formType === 'registro') {
-        document.getElementById('seccion-registro').style.display = 'block';
-        window.location.hash = 'registro';
-      } else {
-        document.getElementById('seccion-busqueda').style.display = 'block';
-        window.location.hash = 'busqueda';
-      }
-    }
-
-    function volverInicio() {
-      document.getElementById('menu-principal').style.display = 'flex';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      document.getElementById('resultado-consulta').innerHTML = '';
-      window.location.hash = '';
-    }
-
     window.addEventListener('hashchange', function() {
       if (window.location.hash === '#registro') {
         showForm('registro');
@@ -172,13 +149,13 @@
       
       const { error } = await supabase
         .from('reportes_bienestar')
-        .insert({
+        .insert([{
           cedula: cedula,
           nombre: form.querySelector('input[placeholder="Nombre"]').value,
           ubicacion: form.querySelector('input[placeholder="Estado/Ciudad"]').value,
           estado: form.querySelector('select').value,
           mensaje: form.querySelector('textarea').value
-        }).single();
+        }]);
       
       if (error) {
         alert('Error al guardar el reporte: ' + error.message);
@@ -216,10 +193,10 @@
       if (data) {
         resultadoDiv.innerHTML = `
           <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px">
-            <h3>${data.nombre}</h3>
-            <p><strong>Ubicación:</strong> ${data.ubicacion}</p>
-            <p><strong>Estado:</strong> ${data.estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
-            <p><strong>Mensaje:</strong> ${data.mensaje}</p>
+            <h3>\${data.nombre}</h3>
+            <p><strong>Ubicación:</strong> \${data.ubicacion}</p>
+            <p><strong>Estado:</strong> \${data.estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
+            <p><strong>Mensaje:</strong> \${data.mensaje}</p>
           </div>
         `;
       } else {
@@ -240,208 +217,3 @@
   </section>
 </body>
 </html>
-=======
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Venezuela Conectada</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f8f9fa;
-    }
-    .navbar {
-      background-color: #343a40;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      margin: 0 10px;
-    }
-    .navbar a.active {
-      font-weight: bold;
-    }
-    .navbar a.disabled {
-      color: #adb5bd;
-      cursor: not-allowed;
-    }
-    #menu-principal {
-      display: flex;
-      padding: 20px;
-      gap: 20px;
-    }
-    .block {
-      flex: 1;
-      padding: 20px;
-      border-radius: 10px;
-      color: white;
-      text-align: center;
-      cursor: pointer;
-    }
-    .left-block {
-      background-color: #2dc653;
-    }
-    .right-block {
-      background-color: #0077b6;
-    }
-    #seccion-registro, #seccion-busqueda {
-      display: none;
-      padding: 20px;
-      background: white;
-      border-radius: 5px;
-      margin-top: 20px;
-      color: black;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    button {
-      background-color: #0077b6;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="navbar">
-    <div>
-      <a href="#" class="active">Inicio</a>
-      <a href="#" class="disabled">Bolsa de Empleo Local</a>
-      <a href="#" class="disabled">Directorio de Proveedores y Materiales</a>
-      <a href="#" class="disabled">Apoyo y Crowdfunding Comunitario</a>
-    </div>
-  </div>
-
-  <main id="menu-principal">
-    <div class="block left-block" onclick="showForm('registro')">
-      <h2>Avisar que estoy a salvo</h2>
-    </div>
-    <div class="block right-block" onclick="showForm('busqueda')">
-      <h2>Consultar Estado de Familiar</h2>
-    </div>
-  </main>
-
-  <div id="seccion-registro">
-    <form>
-      <input type="text" placeholder="Nombre" required>
-      <input type="text" placeholder="Cédula" required>
-      <input type="text" placeholder="Estado/Ciudad" required>
-      <select required>
-        <option value="">Seleccione estado de conectividad/salud</option>
-        <option value="bien">Estoy bien</option>
-        <option value="emergencia">Necesito ayuda</option>
-      </select>
-      <textarea placeholder="Mensaje corto (máx. 100 caracteres)" maxlength="100" required></textarea>
-      <label style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
-        Acepto publicar mi estado para que mis familiares me encuentren (Marcar con una X en la casilla de al lado)
-        <input type="checkbox" required style="width: 24px; height: 24px;">
-      </label>
-      <button type="button" onclick="enviarReporte()">Enviar Reporte</button>
-      <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-left:10px">Volver al Inicio</button>
-    </form>
-  </div>
-
-  <div id="seccion-busqueda">
-    <form>
-      <input type="text" placeholder="Número de cédula" required>
-      <button type="button" onclick="buscarReporte()">Buscar</button>
-      <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-top:10px; display:block">Volver al Inicio</button>
-    </form>
-    <div id="resultado-consulta"></div>
-  </div>
-
-  <script>
-    let dataReportes = {};
-
-    function showForm(formType) {
-      document.getElementById('menu-principal').style.display = 'none';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      
-      if (formType === 'registro') {
-        document.getElementById('seccion-registro').style.display = 'block';
-      } else {
-        document.getElementById('seccion-busqueda').style.display = 'block';
-      }
-    }
-
-    function volverInicio() {
-      document.getElementById('menu-principal').style.display = 'flex';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      document.getElementById('resultado-consulta').innerHTML = '';
-    }
-
-    function enviarReporte() {
-      const form = document.querySelector('#seccion-registro form');
-      const cedula = form.querySelector('input[placeholder="Cédula"]').value;
-      const consentimiento = form.querySelector('input[type="checkbox"]').checked;
-      
-      if (!cedula || !consentimiento) {
-        alert('Por favor complete su cédula y acepte el consentimiento');
-        return;
-      }
-      
-      dataReportes[cedula] = {
-        nombre: form.querySelector('input[placeholder="Nombre"]').value,
-        ubicacion: form.querySelector('input[placeholder="Estado/Ciudad"]').value,
-        estado: form.querySelector('select').value,
-        mensaje: form.querySelector('textarea').value
-      };
-      
-      alert('Estado Guardado. Gracias por reportarte.');
-      form.reset();
-      volverInicio();
-    }
-
-    function buscarReporte() {
-      const form = document.querySelector('#seccion-busqueda form');
-      const cedula = form.querySelector('input[placeholder="Número de cédula"]').value;
-      const resultadoDiv = document.getElementById('resultado-consulta');
-      
-      if (!cedula) {
-        alert('Por favor ingrese un número de cédula');
-        return;
-      }
-      
-      if (dataReportes[cedula]) {
-        resultadoDiv.innerHTML = `
-          <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px">
-            <h3>${dataReportes[cedula].nombre}</h3>
-            <p><strong>Ubicación:</strong> ${dataReportes[cedula].ubicacion}</p>
-            <p><strong>Estado:</strong> ${dataReportes[cedula].estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
-            <p><strong>Mensaje:</strong> ${dataReportes[cedula].mensaje}</p>
-          </div>
-        `;
-      } else {
-        resultadoDiv.innerHTML = '<p style="color:#dc3545; margin-top:20px">No hay reportes de esta cédula todavía</p>';
-      }
-    }
-  </script>
-
-  <section id="telefonos-emergencia" style="margin: 20px 0; padding: 20px; background-color: #e9ecef; border-radius: 10px;">
-    <h2 style="text-align: center; font-size: 1.25rem; margin-bottom: 15px;">TELÉFONOS DE EMERGENCIA (NACIONAL)</h2>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">171 <br/><small>Teléfono fijo CANTV / Emergencias</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">*1 <br/><small>Movilnet</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">112 <br/><small>Digitel</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">911 <br/><small>Movistar</small></div>
-    </div>
-    <p style="font-size: 0.8rem; text-align: center; margin-top: 15px; color: #6c757d;">Ante una emergencia médica o de rescate inminente, priorice la llamada telefónica tradicional antes de usar medios digitales.</p>
-  </section>
-</body>
-</html>
->>>>>>> 5b2f2bf31ef1c3e3c934bdc6a5f0d61bdc564235
