@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Venezuela Conectada</title>
-  <script src="https://jsdelivr.net"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -135,7 +135,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Initialize Supabase client
-    const supabaseClient = supabase.createClient('https://supabase.co', 'TU_PUBLISHABLE_KEY_AQUÍ');
+    const { createClient } = supabase;
+    const supabaseClient = createClient('https://supabase.co', 'PEGA_AQUÍ_TU_PUBLISHABLE_KEY_REAL_DE_SUPABASE');
 
     function showForm(section) {
       document.getElementById('menu-principal').style.display = 'none';
@@ -162,7 +163,8 @@
       }
     });
 
-    async function enviarReporte() {
+    async function enviarReporte(e) {
+      e.preventDefault();
       const form = document.querySelector('#seccion-registro form');
       const cedula = form.querySelector('input[placeholder="Cédula"]').value;
       const consentimiento = form.querySelector('input[type="checkbox"]').checked;
@@ -193,7 +195,8 @@
       volverInicio();
     }
 
-    async function buscarReporte() {
+    async function buscarReporte(e) {
+      e.preventDefault();
       const form = document.querySelector('#seccion-busqueda form');
       const cedula = form.querySelector('input[placeholder="Número de cédula"]').value;
       const resultadoDiv = document.getElementById('resultado-consulta');
