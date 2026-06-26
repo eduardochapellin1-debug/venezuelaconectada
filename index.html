@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Venezuela Conectada</title>
+  <script src="https://jsdelivr.net"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -120,12 +121,36 @@
     <div id="resultado-consulta"></div>
   </div>
 
+  <section id="telefonos-emergencia" style="margin: 20px 0; padding: 20px; background-color: #e9ecef; border-radius: 10px;">
+    <h2 style="text-align: center; font-size: 1.25rem; margin-bottom: 15px;">TELÉFONOS DE EMERGENCIA (NACIONAL)</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">171 <br/><small>Teléfono fijo CANTV / Emergencias</small></div>
+      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">*1 <br/><small>Movilnet</small></div>
+      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">112 <br/><small>Digitel</small></div>
+      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">911 <br/><small>Movistar</small></div>
+    </div>
+    <p style="font-size: 0.8rem; text-align: center; margin-top: 15px; color: #6c757d;">Ante una emergencia médica o de rescate inminente, priorice la llamada telefónica tradicional antes de usar medios digitales.</p>
+  </section>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Initialize Supabase client
-    const supabaseUrl = 'https://supabase.co';
-    const supabaseKey = 'sb_publishable_JQ-FHGzSDjLbfVvrttqiQA_2xXSJSh-';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseClient = supabase.createClient('https://supabase.co', 'TU_PUBLISHABLE_KEY_AQUÍ');
+
+    function showForm(section) {
+      document.getElementById('menu-principal').style.display = 'none';
+      document.getElementById('seccion-registro').style.display = 'none';
+      document.getElementById('seccion-busqueda').style.display = 'none';
+      window.location.hash = section;
+      document.getElementById(`seccion-${section}`).style.display = 'block';
+    }
+
+    function volverInicio() {
+      document.getElementById('menu-principal').style.display = 'flex';
+      document.getElementById('seccion-registro').style.display = 'none';
+      document.getElementById('seccion-busqueda').style.display = 'none';
+      window.location.hash = '';
+    }
 
     window.addEventListener('hashchange', function() {
       if (window.location.hash === '#registro') {
@@ -147,7 +172,7 @@
         return;
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('reportes_bienestar')
         .insert([{
           cedula: cedula,
@@ -178,11 +203,11 @@
         return;
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('reportes_bienestar')
-        .select()
+        .select('*')
         .eq('cedula', cedula)
-        .maybeSingle();
+        .single();
       
       if (error) {
         alert('Error al buscar el reporte: ' + error.message);
@@ -193,10 +218,10 @@
       if (data) {
         resultadoDiv.innerHTML = `
           <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px">
-            <h3>\${data.nombre}</h3>
-            <p><strong>Ubicación:</strong> \${data.ubicacion}</p>
-            <p><strong>Estado:</strong> \${data.estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
-            <p><strong>Mensaje:</strong> \${data.mensaje}</p>
+            <h3>${data.nombre}</h3>
+            <p><strong>Ubicación:</strong> ${data.ubicacion}</p>
+            <p><strong>Estado:</strong> ${data.estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
+            <p><strong>Mensaje:</strong> ${data.mensaje}</p>
           </div>
         `;
       } else {
@@ -204,16 +229,5 @@
       }
     }
   </script>
-
-  <section id="telefonos-emergencia" style="margin: 20px 0; padding: 20px; background-color: #e9ecef; border-radius: 10px;">
-    <h2 style="text-align: center; font-size: 1.25rem; margin-bottom: 15px;">TELÉFONOS DE EMERGENCIA (NACIONAL)</h2>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">171 <br/><small>Teléfono fijo CANTV / Emergencias</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">*1 <br/><small>Movilnet</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">112 <br/><small>Digitel</small></div>
-      <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">911 <br/><small>Movistar</small></div>
-    </div>
-    <p style="font-size: 0.8rem; text-align: center; margin-top: 15px; color: #6c757d;">Ante una emergencia médica o de rescate inminente, priorice la llamada telefónica tradicional antes de usar medios digitales.</p>
-  </section>
 </body>
 </html>
