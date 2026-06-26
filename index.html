@@ -107,7 +107,7 @@
         Acepto publicar mi estado para que mis familiares me encuentren (Marcar con una X en la casilla de al lado)
         <input type="checkbox" required style="width: 24px; height: 24px;">
       </label>
-      <button type="button" onclick="enviarReporte()">Enviar Reporte</button>
+      <button type="submit" onclick="enviarReporte()">Enviar Reporte</button>
       <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-left:10px">Volver al Inicio</button>
     </form>
   </div>
@@ -115,7 +115,7 @@
   <div id="seccion-busqueda">
     <form>
       <input type="text" placeholder="Número de cédula" required>
-      <button type="button" onclick="buscarReporte()">Buscar</button>
+      <button type="submit" onclick="buscarReporte()">Buscar</button>
       <button type="button" onclick="volverInicio()" style="background:#6c757d; margin-top:10px; display:block">Volver al Inicio</button>
     </form>
     <div id="resultado-consulta"></div>
@@ -133,104 +133,79 @@
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Initialize Supabase client
-    const { createClient } = supabase;
-    const supabaseClient = createClient('https://supabase.co', 'PEGA_AQUÍ_TU_PUBLISHABLE_KEY_REAL_DE_SUPABASE');
+     <script>
+// Inicializar Supabase
+const { createClient } = supabase;
+const supabaseClient = createClient('https://supabase.co', 'sb_publishable_JQ-FHGzSDjLbfVvrttqiQA_2xXSJSh-');
 
-    function showForm(section) {
-      document.getElementById('menu-principal').style.display = 'none';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      window.location.hash = section;
-      document.getElementById(`seccion-${section}`).style.display = 'block';
-    }
+// Función para registrar estado (Botón Verde)
+async function enviarReporte(e) {
+    e.preventDefault();
+    const cedula = document.getElementById('cedula').value.trim();
+    const nombre = document.getElementById('nombre').value.trim();
+    const ubicacion = document.getElementById('ubicacion').value.trim();
+    const estado = document.getElementById('estado').value;
+    const mensaje = document.getElementById('mensaje').value.trim();
 
-    function volverInicio() {
-      document.getElementById('menu-principal').style.display = 'flex';
-      document.getElementById('seccion-registro').style.display = 'none';
-      document.getElementById('seccion-busqueda').style.display = 'none';
-      window.location.hash = '';
-    }
-
-    window.addEventListener('hashchange', function() {
-      if (window.location.hash === '#registro') {
-        showForm('registro');
-      } else if (window.location.hash === '#busqueda') {
-        showForm('busqueda');
-      } else if (window.location.hash === '') {
-        volverInicio();
-      }
-    });
-
-    async function enviarReporte(e) {
-      e.preventDefault();
-      const form = document.querySelector('#seccion-registro form');
-      const cedula = form.querySelector('input[placeholder="Cédula"]').value;
-      const consentimiento = form.querySelector('input[type="checkbox"]').checked;
-      
-      if (!cedula || !consentimiento) {
-        alert('Por favor complete su cédula y acepte el consentimiento');
+    if (!cedula || !nombre || !ubicacion) {
+        alert("Por favor, rellene los campos obligatorios.");
         return;
-      }
-      
-      const { error } = await supabaseClient
-        .from('reportes_bienestar')
-        .insert([{
-          cedula: cedula,
-          nombre: form.querySelector('input[placeholder="Nombre"]').value,
-          ubicacion: form.querySelector('input[placeholder="Estado/Ciudad"]').value,
-          estado: form.querySelector('select').value,
-          mensaje: form.querySelector('textarea').value
-        }]);
-      
-      if (error) {
-        alert('Error al guardar el reporte: ' + error.message);
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('reportes_bienestar')
+            .insert([{ cedula, nombre, ubicacion, estado, mensaje }]);
+
+        if (error) throw error;
+
+        alert("Estado Guardado. Gracias por reportarte.");
+        document.getElementById('form-registro').reset();
+        window.location.hash = '';
+    } catch (error) {
+        alert("Error al guardar: " + error.message);
         console.error(error);
+    }
+}
+
+// Función para buscar familiar (Botón Azul)
+async function buscarReporte(e) {
+    e.preventDefault();
+    const cedula_buscada = document.getElementById('cedula_buscar').value.trim();
+    const resultadoDiv = document.getElementById('resultado-busqueda');
+    resultadoDiv.innerHTML = '';
+
+    if (!cedula_buscada) {
+        alert("Por favor, ingrese una cédula.");
         return;
-      }
-      
-      alert('Estado Guardado. Gracias por reportarte.');
-      form.reset();
-      volverInicio();
     }
 
-    async function buscarReporte(e) {
-      e.preventDefault();
-      const form = document.querySelector('#seccion-busqueda form');
-      const cedula = form.querySelector('input[placeholder="Número de cédula"]').value;
-      const resultadoDiv = document.getElementById('resultado-consulta');
-      
-      if (!cedula) {
-        alert('Por favor ingrese un número de cédula');
-        return;
-      }
-      
-      const { data, error } = await supabaseClient
-        .from('reportes_bienestar')
-        .select('*')
-        .eq('cedula', cedula)
-        .single();
-      
-      if (error) {
-        alert('Error al buscar el reporte: ' + error.message);
+    try {
+        const { data, error } = await supabaseClient
+            .from('reportes_bienestar')
+            .select('*')
+            .eq('cedula', cedula_buscada);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            const registro = data[0];
+            resultadoDiv.innerHTML = `
+                <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px; text-align:left; border-left:5px solid #28a745;">
+                    <h3>🟢 ${registro.nombre}</h3>
+                    <p><strong>Ubicación:</strong> ${registro.ubicacion}</p>
+                    <p><strong>Estado:</strong> ${registro.estado}</p>
+                    <p><strong>Mensaje:</strong> ${registro.mensaje || 'Sin mensaje adicional'}</p>
+                </div>
+            `;
+        } else {
+            resultadoDiv.innerHTML = `<p style="color:#dc3545; margin-top:20px;">No hay reportes de esta cédula todavía</p>`;
+        }
+    } catch (error) {
+        alert("Error en búsqueda: " + error.message);
         console.error(error);
-        return;
-      }
-      
-      if (data) {
-        resultadoDiv.innerHTML = `
-          <div style="margin-top:20px; padding:15px; background:#f8f9fa; border-radius:5px">
-            <h3>${data.nombre}</h3>
-            <p><strong>Ubicación:</strong> ${data.ubicacion}</p>
-            <p><strong>Estado:</strong> ${data.estado === 'bien' ? 'Está bien' : 'Necesita ayuda'}</p>
-            <p><strong>Mensaje:</strong> ${data.mensaje}</p>
-          </div>
-        `;
-      } else {
-        resultadoDiv.innerHTML = '<p style="color:#dc3545; margin-top:20px">No hay reportes de esta cédula todavía</p>';
-      }
     }
-  </script>
+}
+</script>
 </body>
 </html>
